@@ -70,14 +70,24 @@ void return_to_sender(){
   setMotors(125, -100);
   delay(200);
 }
-int target_position(){
-  int diff_vel = 0;
-  if (left_state && !left_front_state && !right_front_state && !right_state) diff_vel = -35;
-  else if (!left_state && left_front_state && !right_front_state && !right_state) diff_vel = -15;
-  else if (!left_state && !left_front_state && right_front_state && !right_state) diff_vel = 15;
-  else if (!left_state && !left_front_state && !right_front_state && right_state) diff_vel = 35;
-  else if (left_front_state && right_front_state) diff_vel = 0;
-  return diff_vel;
+
+void target_position_with_turn(){
+  if (left_state && !left_front_state && !right_front_state && !right_state) setMotors(MAX_VEL - 35, MAX_VEL + 35);
+  else if (!left_state && left_front_state && !right_front_state && !right_state) setMotors(MAX_VEL - 15, MAX_VEL + 15);
+  else if (!left_state && !left_front_state && right_front_state && !right_state) setMotors(MAX_VEL + 35, MAX_VEL - 35);
+  else if (!left_state && !left_front_state && !right_front_state && right_state) setMotors(MAX_VEL + 35, MAX_VEL - 35);
+  else if (left_front_state && right_front_state) setMotors(MAX_VEL, MAX_VEL);
+  else if (!left_state && !left_front_state && !right_front_state && !right_state) setMotors(MAX_VEL * 0.7, MAX_VEL * -0.7);
+}
+
+void target_position_charge(){
+  setMotors(MAX_VEL + 50, MAX_VEL + 50);
+  delay(2000);
+  if (left_state && !left_front_state && !right_front_state && !right_state) setMotors(MAX_VEL - 35, MAX_VEL + 35);
+  else if (!left_state && left_front_state && !right_front_state && !right_state) setMotors(MAX_VEL - 15, MAX_VEL + 15);
+  else if (!left_state && !left_front_state && right_front_state && !right_state) setMotors(MAX_VEL + 35, MAX_VEL - 35);
+  else if (!left_state && !left_front_state && !right_front_state && right_state) setMotors(MAX_VEL + 35, MAX_VEL - 35);
+  else if (left_front_state && right_front_state) setMotors(MAX_VEL + 50, MAX_VEL + 50);
 }
 
 void setup() {
@@ -126,10 +136,14 @@ void loop() {
   }
   if (!left_floor_state && !right_floor_state) return_to_sender();
   else{
-    int diff = target_position();
-    // We need an environment free of obstacles to test this
-    setMotors(20 + diff, 20 - diff);
+    if (digitalRead(sw1) && !digitalRead(sw2)){
+      target_position_with_turn();
+    }
+    else if(digitalRead(sw2) && !digitalRead(sw1)){
+      target_position_charge();
+    }
   }
+
   //@TODO: Check if the function can read the values correctly, use the leds before the motors
 
 
